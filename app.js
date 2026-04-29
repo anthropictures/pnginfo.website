@@ -1,16 +1,16 @@
 // pnginfo.website
 //
 // Reads generation parameters embedded in AI-generated media.
-//   PNG  — tEXt / iTXt chunks
-//   JPEG — EXIF UserComment (A1111 piexif unicode)
-//   WebP — EXIF IFD0 ASCII tags (ComfyUI key:JSON convention) + UserComment fallback
-//   WebM — Matroska SimpleTag elements (ComfyUI/VHS)
-//   MP4  — iTunes-style metadata atoms (moov/udta/meta keys + ilst)
+//   PNG  -- tEXt / iTXt chunks
+//   JPEG -- EXIF UserComment (A1111 piexif unicode)
+//   WebP -- EXIF IFD0 ASCII tags (ComfyUI key:JSON convention) + UserComment fallback
+//   WebM -- Matroska SimpleTag elements (ComfyUI/VHS)
+//   MP4  -- iTunes-style metadata atoms (moov/udta/meta keys + ilst)
 //
 // Parser logic mirrors e6ai's gen_info.js, adapted to read from File objects
 // (no HTTP Range requests) and rendered with vanilla DOM APIs.
 
-// ─── Constants ────────────────────────────────────────────────────────
+// --- Constants --------------------------------------------------------
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 const EXIF_IFD_TAG = 0x8769;
@@ -31,7 +31,7 @@ const ACCEPTED_TYPES = new Set([
 ]);
 const ACCEPTED_EXTS = new Set(["png", "jpg", "jpeg", "webp", "webm", "mp4"]);
 
-// ─── PNG ──────────────────────────────────────────────────────────────
+// --- PNG --------------------------------------------------------------
 
 function parsePngChunks(buffer) {
   const view = new DataView(buffer);
@@ -70,7 +70,7 @@ function parsePngChunks(buffer) {
       if (k !== -1 && k + 2 < data.length) {
         const compressed = data[k + 1] === 1;
         if (compressed) {
-          // Skip compressed iTXt — would need DecompressionStream; rare for SD images.
+          // Skip compressed iTXt -- would need DecompressionStream; rare for SD images.
           offset += 12 + length;
           continue;
         }
@@ -91,7 +91,7 @@ function parsePngChunks(buffer) {
   return chunks;
 }
 
-// ─── JPEG ─────────────────────────────────────────────────────────────
+// --- JPEG -------------------------------------------------------------
 
 function parseJpegUserComment(buffer) {
   const view = new DataView(buffer);
@@ -175,7 +175,7 @@ function parseExifUserComment(buffer, tiffStart) {
   return [];
 }
 
-// ─── WebP ─────────────────────────────────────────────────────────────
+// --- WebP -------------------------------------------------------------
 
 function parseWebpChunks(buffer) {
   const view = new DataView(buffer);
@@ -269,7 +269,7 @@ function parseWebpExifUserComment(buffer, exifStart) {
   return parseExifUserComment(buffer, tiffStart);
 }
 
-// ─── WebM (Matroska/EBML) ─────────────────────────────────────────────
+// --- WebM (Matroska/EBML) ---------------------------------------------
 
 // EBML variable-length integer.
 // For element IDs the marker bit is part of the value;
@@ -408,7 +408,7 @@ function parseEbmlSimpleTag(view, buffer, start, end) {
   return null;
 }
 
-// ─── MP4 ──────────────────────────────────────────────────────────────
+// --- MP4 --------------------------------------------------------------
 
 // With ffmpeg -movflags use_metadata_tags, custom tags live in
 // moov > udta > meta > keys + ilst.
@@ -445,7 +445,7 @@ function findMp4Box(view, start, end, type) {
 
     if (size === 0) size = end - offset; // box extends to end of parent
     if (size === 1) {
-      // 64-bit largesize at offset+8 — we don't fully support these,
+      // 64-bit largesize at offset+8 -- we don't fully support these,
       // bail rather than silently mis-parse.
       return null;
     }
@@ -524,7 +524,7 @@ function parseMp4Ilst(view, buffer, start, end, keyList) {
   return chunks;
 }
 
-// ─── Shared helpers ───────────────────────────────────────────────────
+// --- Shared helpers ---------------------------------------------------
 
 function readFourCC(view, offset) {
   return String.fromCharCode(
@@ -553,7 +553,7 @@ function unwrapJson(str) {
   return str;
 }
 
-// ─── Format dispatch ──────────────────────────────────────────────────
+// --- Format dispatch --------------------------------------------------
 
 function detectFormat(file) {
   if (file.type === "image/png") return "png";
@@ -582,7 +582,7 @@ function extractChunks(buffer, format) {
 
 const VIDEO_FORMATS = new Set(["webm", "mp4"]);
 
-// ─── A1111 "parameters" string parser ────────────────────────────────
+// --- A1111 "parameters" string parser --------------------------------
 //
 // Stable Diffusion WebUI writes a single "parameters" tEXt chunk with this shape:
 //
@@ -597,7 +597,7 @@ const VIDEO_FORMATS = new Set(["webm", "mp4"]);
 function parseParametersString(text) {
   const result = { positive: "", negative: "", settings: [] };
 
-  // Find the settings line — last line that starts with a "Key: value" pair
+  // Find the settings line -- last line that starts with a "Key: value" pair
   // and has multiple comma-separated entries. A1111 always emits a single
   // settings line at the end.
   const lines = text.split("\n");
@@ -677,7 +677,7 @@ function parseSettingsLine(line) {
   return settings;
 }
 
-// ─── DOM rendering ────────────────────────────────────────────────────
+// --- DOM rendering ----------------------------------------------------
 
 const els = {
   dropzone: document.getElementById("dropzone"),
@@ -731,7 +731,7 @@ function setPreview(file, format) {
   if (isVideo) showEl.load();
 
   els.placeholder.hidden = true;
-  els.filename.textContent = `${file.name} · ${formatBytes(file.size)}`;
+  els.filename.textContent = `${file.name} * ${formatBytes(file.size)}`;
   els.filename.hidden = false;
 }
 
@@ -818,7 +818,7 @@ function renderSettingsField(settings) {
 }
 
 function renderParametersChunk(chunk) {
-  // A1111-style "parameters" string — split into positive/negative/settings.
+  // A1111-style "parameters" string -- split into positive/negative/settings.
   const parsed = parseParametersString(chunk.text);
   const nodes = [];
 
@@ -834,7 +834,7 @@ function renderParametersChunk(chunk) {
     nodes.push(renderSettingsField(parsed.settings));
   }
 
-  // Always include the raw chunk too — gives the user a one-click "copy
+  // Always include the raw chunk too -- gives the user a one-click "copy
   // everything" path that round-trips back into A1111/Forge UIs.
   nodes.push(renderField("parameters (raw)", chunk.text));
 
@@ -893,7 +893,7 @@ function renderChunks(chunks) {
   els.results.appendChild(frag);
 }
 
-// ─── File handling ────────────────────────────────────────────────────
+// --- File handling ----------------------------------------------------
 
 async function handleFile(file) {
   if (!file) return;
@@ -904,10 +904,10 @@ async function handleFile(file) {
     return;
   }
   if (file.type && !ACCEPTED_TYPES.has(file.type)) {
-    // Type mismatch but extension matched — proceed with a notice
-    setStatus(`Reading ${format.toUpperCase()} (declared type: ${file.type})…`);
+    // Type mismatch but extension matched -- proceed with a notice
+    setStatus(`Reading ${format.toUpperCase()} (declared type: ${file.type})...`);
   } else {
-    setStatus(`Reading ${file.name}…`);
+    setStatus(`Reading ${file.name}...`);
   }
 
   setPreview(file, format);
@@ -934,7 +934,7 @@ function pickAcceptedFile(items) {
   return null;
 }
 
-// ─── Wire up events ───────────────────────────────────────────────────
+// --- Wire up events ---------------------------------------------------
 
 let dragDepth = 0;
 
@@ -998,7 +998,7 @@ window.addEventListener("paste", (e) => {
   }
 });
 
-// ─── Pane splitter ────────────────────────────────────────────────────
+// --- Pane splitter ----------------------------------------------------
 
 (() => {
   const resizer = document.getElementById("resizer");
