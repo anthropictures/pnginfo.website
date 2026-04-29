@@ -75,8 +75,7 @@ body {
 
 .layout {
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  display: flex;
   gap: 16px;
   padding: 16px;
   min-height: 0;
@@ -84,7 +83,7 @@ body {
 
 @media (max-width: 900px) {
   .layout {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 
@@ -104,6 +103,23 @@ body {
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease;
   outline: none;
+
+  /* Native horizontal resize handle in bottom-right corner — drag to
+     redistribute width between dropzone and sidebar. */
+  flex: 0 0 auto;
+  width: 60%;
+  min-width: 320px;
+  max-width: calc(100vw - 400px);
+  resize: horizontal;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .dropzone {
+    width: auto;
+    max-width: none;
+    resize: vertical;
+  }
 }
 .dropzone:hover,
 .dropzone:focus-visible {
@@ -159,6 +175,7 @@ body {
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 0;
 }
 
 .status {
@@ -219,8 +236,9 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  max-height: 320px;
-  overflow-y: auto;
+  max-height: 80vh;
+  overflow: auto;
+  resize: vertical;
 }
 .field--inline .field__value {
   white-space: normal;
