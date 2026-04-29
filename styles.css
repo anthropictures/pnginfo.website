@@ -1,0 +1,387 @@
+:root {
+  --bg: #0e0f12;
+  --bg-elev: #16181d;
+  --bg-elev-2: #1d2026;
+  --border: #2a2e36;
+  --border-strong: #3a3f4a;
+  --accent: #7aa2f7;
+  --accent-strong: #a4c2ff;
+  --text: #e6e8ee;
+  --text-dim: #9aa1ad;
+  --text-muted: #6b7280;
+  --ok: #95d6a4;
+  --warn: #e7c787;
+  --err: #f08a8a;
+  --radius: 10px;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f8fa;
+    --bg-elev: #ffffff;
+    --bg-elev-2: #f1f3f7;
+    --border: #e2e5eb;
+    --border-strong: #c8ccd4;
+    --accent: #3b6cd9;
+    --accent-strong: #1f4ec0;
+    --text: #1a1d23;
+    --text-dim: #4a5160;
+    --text-muted: #7a8090;
+    --ok: #2a8a4d;
+    --warn: #a47010;
+    --err: #b3372b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.tagline {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.layout {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+}
+
+/* --- Dropzone --------------------------------------------- */
+
+.dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  min-height: 360px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+  outline: none;
+
+  /* Width is controlled by the splitter handle to its right.
+     Sidebar absorbs the remainder via flex: 1. */
+  flex: 0 0 auto;
+  width: 60%;
+  min-width: 320px;
+  max-width: calc(100vw - 400px);
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .dropzone {
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* --- Pane splitter --------------------------------------- */
+
+.resizer {
+  flex: 0 0 6px;
+  align-self: stretch;
+  cursor: col-resize;
+  background: transparent;
+  border-radius: 3px;
+  position: relative;
+  touch-action: none;
+  transition: background 100ms ease;
+}
+.resizer:hover,
+.resizer:focus-visible,
+.resizer.is-active {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.resizer:focus-visible {
+  outline: none;
+}
+/* Centered grip glyph so the handle is discoverable without hover */
+.resizer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  background: var(--border-strong);
+  border-radius: 2px;
+  transition: background 100ms ease;
+}
+.resizer:hover::before,
+.resizer:focus-visible::before,
+.resizer.is-active::before {
+  background: var(--accent-strong);
+}
+
+@media (max-width: 900px) {
+  .resizer { display: none; }
+}
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: var(--accent);
+}
+.dropzone.is-dragover {
+  border-color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-elev));
+}
+
+.dropzone__placeholder {
+  text-align: center;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+.dropzone__hint {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 500;
+}
+.dropzone__sub {
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+.dropzone__formats {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dropzone__preview {
+  max-width: 100%;
+  max-height: calc(100vh - 240px);
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.dropzone__filename {
+  margin: 12px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  word-break: break-all;
+  text-align: center;
+}
+
+/* --- Sidebar --------------------------------------------- */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.status {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 10px 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.status.is-error {
+  color: var(--err);
+  border-color: color-mix(in srgb, var(--err) 40%, var(--border));
+}
+.status.is-ok {
+  color: var(--ok);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.field {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.field__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border);
+}
+.field__key {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  word-break: break-word;
+}
+.field__value {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-height: 80vh;
+  overflow: auto;
+  resize: vertical;
+}
+.field--inline .field__value {
+  white-space: normal;
+}
+
+.copy-btn {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 100ms ease, border-color 100ms ease, color 100ms ease;
+  flex: 0 0 auto;
+}
+.copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+.copy-btn:active {
+  transform: translateY(1px);
+}
+.copy-btn.is-copied {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+/* Inline mini copy buttons used inside settings rows */
+.kv-grid {
+  margin: 0;
+  padding: 6px 6px 8px;
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr auto;
+  gap: 2px 10px;
+  align-items: baseline;
+}
+.kv-grid dt {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.kv-grid dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  padding: 4px 6px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.kv-grid .copy-btn {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 4px 0 -2px 2px;
+}
+
+/* --- Footer --------------------------------------------- */
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.footer code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--bg-elev);
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+/* --- Scrollbar polish (webkit) --------------------------- */
+
+.results::-webkit-scrollbar,
+.field__value::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.results::-webkit-scrollbar-thumb,
+.field__value::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+.results::-webkit-scrollbar-track,
+.field__value::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>pnginfo · drop a generated image or video to read its parameters</title>
+  <meta name="description" content="Drop an AI-generated image (PNG/JPEG/WebP) or video (WebM/MP4) and read its embedded generation parameters — runs entirely in your browser." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>pnginfo.website</h1>
+    <p class="tagline">drop an image, read its generation parameters · runs entirely in your browser</p>
+  </header>
+
+  <main class="layout">
+    <section
+      id="dropzone"
+      class="dropzone"
+      aria-label="Drop image here"
+      tabindex="0"
+    >
+      <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,video/webm,video/mp4" hidden />
+      <div class="dropzone__placeholder" data-placeholder>
+        <p class="dropzone__hint">Drop image or video here</p>
+        <p class="dropzone__sub">or click to choose · paste with ⌘/Ctrl+V</p>
+        <p class="dropzone__formats">PNG · JPEG · WebP · WebM · MP4</p>
+      </div>
+      <img id="preview-image" class="dropzone__preview" alt="" hidden />
+      <video id="preview-video" class="dropzone__preview" controls loop muted playsinline hidden></video>
+      <p id="filename" class="dropzone__filename" hidden></p>
+    </section>
+
+    <div
+      id="resizer"
+      class="resizer"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize panes"
+      tabindex="0"
+    ></div>
+
+    <section class="sidebar" aria-label="Generation parameters">
+      <div id="status" class="status" role="status" aria-live="polite">
+        Waiting for image…
+      </div>
+      <div id="results" class="results"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>No uploads — everything stays local.</span>
+    <span>A1111 <code>parameters</code> · ComfyUI <code>prompt</code>/<code>workflow</code> · EXIF UserComment · Matroska SimpleTag · MP4 keys/ilst.</span>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
