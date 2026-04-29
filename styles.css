@@ -104,13 +104,12 @@ body {
   transition: border-color 120ms ease, background 120ms ease;
   outline: none;
 
-  /* Native horizontal resize handle in bottom-right corner — drag to
-     redistribute width between dropzone and sidebar. */
+  /* Width is controlled by the splitter handle to its right.
+     Sidebar absorbs the remainder via flex: 1. */
   flex: 0 0 auto;
   width: 60%;
   min-width: 320px;
   max-width: calc(100vw - 400px);
-  resize: horizontal;
   overflow: auto;
 }
 
@@ -118,8 +117,50 @@ body {
   .dropzone {
     width: auto;
     max-width: none;
-    resize: vertical;
   }
+}
+
+/* ─── Pane splitter ─────────────────────────────────────── */
+
+.resizer {
+  flex: 0 0 6px;
+  align-self: stretch;
+  cursor: col-resize;
+  background: transparent;
+  border-radius: 3px;
+  position: relative;
+  touch-action: none;
+  transition: background 100ms ease;
+}
+.resizer:hover,
+.resizer:focus-visible,
+.resizer.is-active {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.resizer:focus-visible {
+  outline: none;
+}
+/* Centered grip glyph so the handle is discoverable without hover */
+.resizer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  background: var(--border-strong);
+  border-radius: 2px;
+  transition: background 100ms ease;
+}
+.resizer:hover::before,
+.resizer:focus-visible::before,
+.resizer.is-active::before {
+  background: var(--accent-strong);
+}
+
+@media (max-width: 900px) {
+  .resizer { display: none; }
 }
 .dropzone:hover,
 .dropzone:focus-visible {

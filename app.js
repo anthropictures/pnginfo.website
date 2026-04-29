@@ -997,3 +997,78 @@ window.addEventListener("paste", (e) => {
     handleFile(file);
   }
 });
+
+// ─── Pane splitter ────────────────────────────────────────────────────
+
+(() => {
+  const resizer = document.getElementById("resizer");
+  const dropzone = document.getElementById("dropzone");
+  const layout = document.querySelector(".layout");
+  if (!resizer || !dropzone || !layout) return;
+
+  const MIN_LEFT = 320;
+  const MIN_RIGHT = 360;
+
+  function clamp(width) {
+    const layoutRect = layout.getBoundingClientRect();
+    const padX = parseFloat(getComputedStyle(layout).paddingLeft) || 0;
+    const padR = parseFloat(getComputedStyle(layout).paddingRight) || 0;
+    const gap = parseFloat(getComputedStyle(layout).columnGap)
+      || parseFloat(getComputedStyle(layout).gap) || 0;
+    const available = layoutRect.width - padX - padR - gap - resizer.offsetWidth;
+    const max = Math.max(MIN_LEFT, available - MIN_RIGHT);
+    return Math.max(MIN_LEFT, Math.min(width, max));
+  }
+
+  function setWidth(px) {
+    dropzone.style.width = `${clamp(px)}px`;
+  }
+
+  resizer.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    e.preventDefault();
+    resizer.setPointerCapture(e.pointerId);
+    resizer.classList.add("is-active");
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const layoutLeft = layout.getBoundingClientRect().left
+      + (parseFloat(getComputedStyle(layout).paddingLeft) || 0);
+
+    const onMove = (ev) => setWidth(ev.clientX - layoutLeft);
+
+    const onEnd = (ev) => {
+      try { resizer.releasePointerCapture(ev.pointerId); } catch {}
+      resizer.classList.remove("is-active");
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      resizer.removeEventListener("pointermove", onMove);
+      resizer.removeEventListener("pointerup", onEnd);
+      resizer.removeEventListener("pointercancel", onEnd);
+    };
+
+    resizer.addEventListener("pointermove", onMove);
+    resizer.addEventListener("pointerup", onEnd);
+    resizer.addEventListener("pointercancel", onEnd);
+  });
+
+  // Keyboard: ArrowLeft/Right adjust width in 20px steps (40 with shift)
+  resizer.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const step = (e.shiftKey ? 40 : 20) * (e.key === "ArrowLeft" ? -1 : 1);
+    setWidth(dropzone.getBoundingClientRect().width + step);
+  });
+
+  // Reset to default split on double-click
+  resizer.addEventListener("dblclick", () => {
+    dropzone.style.width = "";
+  });
+
+  // Re-clamp on viewport resize so the panes don't end up out-of-bounds
+  window.addEventListener("resize", () => {
+    if (dropzone.style.width) {
+      setWidth(dropzone.getBoundingClientRect().width);
+    }
+  });
+})();
